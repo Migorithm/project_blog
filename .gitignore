@@ -1,0 +1,5 @@
+.flaskenv
+.ypynb_checkpoints
+app.db
+migrations
+venv

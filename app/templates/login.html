@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{title}}</h1>
+<!--. The novalidate attribute is used to tell the web browser
+not to apply validation to the fields in this form, which effectively
+leaves this task to the Flask application running in the server.-->
+    <form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }}<br> <!-- label is defined by first parameter of StringField() -->
+            {{ form.username(size=32) }}
+            {% for error in form.username.errors %} <!--error handling -->
+            <span style="color:red;">[{{error}}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br> <!--Name -->
+            {{ form.password(size=32) }} <!-- size of the field-->
+            {% for error in form.password.errors %} <!-- error messages added by the validators in red color.-->
+            <span style="color:red;">[{{error}}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.remember_me()}}{{form.remember_me.label }}</p>
+        <!--As a general rule, ANY fields that have validators attached will have any error messages
+        that result from validation added under form.<field_name>.errors. in the form of "list"-->
+        <p>{{ form.submit()}}</p>
+    </form>
+
+{% endblock %}
