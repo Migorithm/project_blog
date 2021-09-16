@@ -1,12 +1,14 @@
 from app import db
 from PIL import Image
 import datetime
-from pytz import timezone, utc
+from werkzeug.security import check_password_hash,generate_password_hash
+from flask_login import UserMixin
+from app import login   #login = LoginManager(app)
 
-KST = timezone("Asia/Seoul")
 
+class User(UserMixin,db.Model):
+    __table_args__ = {'extend_existing': True}  # to allow redefining table.
 
-class User(db.Model):
     id = db.Column(db.Integer,primary_key=True) #If not given, it will automatically be stored
     username = db.Column(db.String(64), index=True,unique=True)
     email = db.Column(db.String(120), index=True,unique=True)
@@ -23,6 +25,12 @@ class User(db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
+    #hashing
+    def set_password(self,password):
+        self.password_hash= generate_password_hash(password)
+    def check_password(self,password):
+        return check_password_hash(self.password_hash,password) # Boolean
+
 #Fields are created as attribute of the db.Column class,
 #which takes the field type as an argument
 
@@ -38,8 +46,6 @@ class Post(db.Model):
                           index=True,\
                           default=datetime.datetime.utcnow)
         #These timestamps will be converted to the user's local time when they are displayed.
-        #so, don't have to put something like --
-        #   lambda :utc.localize(datetime.datetime.utcnow()).astimezone(KST)
 
 
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
@@ -52,40 +58,7 @@ class Post(db.Model):
 
 
 
-
-
-""" 
-the model created now define the initial schema for this application 
-But as the application continues to grow, 
-it's likely that you need to make changes to that structure -- removing, modifying..
-
-Alembic makes these schema changes in a way that it doesn't require the DB to be recreated.
-
-To accomplish this task:: 
-    1. Alembic maintains a migration repository where it stores migration scripts 
-    2. Each time a change is made, migration is added to the repository with details.
-    3. You have to use flask-native command "flask db init", exposed by Flask-Migrate
-    
-    #first migration
-    4. With the migration repository in place,it is time to create 
-        the first database migration, which will include the "users table" that 
-        maps to the "User database model".
-    
-    5. "flask db migrate" sub-command generates theise automatic migration 
-    
-    6.  upgrade()   :: apply the migration, 
-        downgrade() :: remove them.
-    
-    7. The flask db migrate command does not make any changes to the database, 
-       to apply the chanages, "flask db upgrade" command must be used.
-            ::Because this application uses SQLite, 
-              the upgrade command will detect that a database does not exist 
-              and will create it. (app.db)
-              
-    8. When working with database server such as Oracle or Mysql, 
-       you have to create the DB in the DB server before running upgrade. 
-    
-    
-"""
-
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 

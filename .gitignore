@@ -1,5 +1,6 @@
 .flaskenv
-.ypynb_checkpoints
+.ipynb_checkpoints
 app.db
 migrations
 venv
+Learning_note
