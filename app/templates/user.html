@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <table>
+        <tr valign="top">  <!--valign is about height whereas aline is about width-->
+            <td><img src="{{ user.avatar(128) }}"></td>
+            <td>
+                <h1>User: {{ user.username }}</h1>
+                {% if user.about_me %}
+                <p>{{ user.about_me }}</p>
+                {% endif %}
+                {% if user.last_seen %}
+                <p>Last seen on: {{ user.last_seen }}</p>
+                {% endif %}
+
+                <!-- To make sure Edit link appears when I am looking at my own profile, add conditional -->
+                {% if user == current_user %}
+                <p><a href="{{ url_for('edit_profile') }}">Edit your profile</a></p>
+                {% endif %}
+
+
+            </td>
+        </tr>
+    </table>
+    <hr>
+    {% for post in posts %}
+        {% include '_post.html' %} <!--Jinja2 statement to include subtemplate-->
+    {% endfor %}
+{% endblock %}

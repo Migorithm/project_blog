@@ -4,6 +4,7 @@ import datetime
 from werkzeug.security import check_password_hash,generate_password_hash
 from flask_login import UserMixin
 from app import login   #login = LoginManager(app)
+from hashlib import md5
 
 
 class User(UserMixin,db.Model):
@@ -13,7 +14,8 @@ class User(UserMixin,db.Model):
     username = db.Column(db.String(64), index=True,unique=True)
     email = db.Column(db.String(120), index=True,unique=True)
     password_hash = db.Column(db.String(128))
-
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     posts = db.relationship("Post",backref="author",lazy="dynamic")
     #This is not an actual database field, but a high-level view between users and posts
@@ -31,10 +33,10 @@ class User(UserMixin,db.Model):
     def check_password(self,password):
         return check_password_hash(self.password_hash,password) # Boolean
 
-#Fields are created as attribute of the db.Column class,
-#which takes the field type as an argument
-
-#optional fields such as index and unique is important in search efficiency
+    def avatar(self,size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=mp&s={}'.format(
+            digest, size)   #d=identicon is also a good option
 
 
 class Post(db.Model):
@@ -62,3 +64,7 @@ class Post(db.Model):
 def load_user(id):
     return User.query.get(int(id))
 
+#Each time the logged-in user navigates to a new page,
+# Flask-Login retrieves the ID of the user from the session, and then loads that user into memory
+#  Because Flask-Login knows nothing about databases, it needs the application's help in loading a user.
+#  For that reason, the extension expects that the application will configure a user loader function
