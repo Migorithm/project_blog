@@ -8,6 +8,7 @@ from app import db
 from datetime import datetime
 from pytz import timezone,utc
 
+
 @app.route("/")
 @app.route("/index")
 @login_required  #If the user navigates to /index, @login_required decorator will intercept the request
@@ -81,12 +82,14 @@ def user(username):
     ]
     return render_template('user.html', user=user, posts=posts)
 
+
 def Korean_time():
     KST = timezone("Asia/Seoul")
     current_time = utc.localize(datetime.utcnow()).astimezone(KST) #you may want to change this
     return current_time
 
-@app.before_request
+
+@app.before_request  #to see last_seen time
 def before_request():
     if current_user.is_authenticated:
         #Koreanized
@@ -95,6 +98,7 @@ def before_request():
         db.session.commit()
         #No db.session.add(user)?
         #-> it's called already when current_user was referenced
+
 
 @app.route("/edit_profile",methods=["GET","POST"])
 @login_required

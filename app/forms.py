@@ -17,10 +17,13 @@ class RegistrationForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     password2 = PasswordField("Repeat Password",validators=[DataRequired(),EqualTo("password")])
     submit = SubmitField("Register")
+
     def validate_username(self,username):
+        #this method is invoked by wtforms in addition to stock
         user = User.query.filter_by(username=username.data).first()
         if user:
             raise ValidationError("Please use a different username")
+
     def validate_email(self,email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
