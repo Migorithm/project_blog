@@ -32,6 +32,15 @@ class EditProfileForm(FlaskForm):
     about_me = TextAreaField("About me",validators=[Length(min=0,max=140)])
     submit = SubmitField('Submit')
 
+    def __init__(self,original_username,*args,**kwargs):
+        super(EditProfileForm,self).__init__(*args,**kwargs)
+        self.original_username = original_username
+
+    def validate_username(self,username):
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError("Please use a different username")
+
 
 #when calling, you can call it by just LoginForm()
 #If you want to get an access to each attribute, simply dot it.
